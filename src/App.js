@@ -2,12 +2,18 @@ import React, { Component } from 'react';
 import { withAuthenticator } from 'aws-amplify-react';
 import { API, graphqlOperation } from 'aws-amplify';
 import { createTodo } from "./graphql/mutations";
+import { listTodos } from './graphql/queries';
 
 class App extends Component {
 
   state = {
     note: "",
     notes: []
+  }
+
+  async componentDidMount() {
+      const result = await API.graphql(graphqlOperation(listTodos));
+      this.setState({ notes: result.data.listTodos.items });
   }
 
   handleChangeNote = event => {
@@ -24,10 +30,12 @@ class App extends Component {
 
     const input = { name: note };
     const result = await API.graphql(graphqlOperation(createTodo, { input }));
-    const newNote = result.data.createNote;
+    console.log("result", result);
+    const newNote = result.data.createTodo;
     const updatedNotes = [newNote, ...notes];
     this.setState({ notes: updatedNotes, note: "" });
   }
+
 
   render() {
     const { notes, note } = this.state;
@@ -67,7 +75,7 @@ class App extends Component {
               <li
                 className="list pa1 f3"
               >
-                {item.note}
+                {item.name}
               </li>
               <button className="bg-transparent bn f4">
                 
